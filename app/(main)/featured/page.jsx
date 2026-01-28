@@ -3,7 +3,11 @@ import Link from 'next/link'
 import { MapPin, DollarSign } from 'lucide-react'
 import Image from 'next/image'
 
-const Featured = () => {
+const Featured = async () => {
+  // Future: Fetch from your database
+  // const listings = await db.query('SELECT * FROM listings ORDER BY created_at DESC LIMIT 4')
+  
+  // For now: Hardcoded 4 listings
   const listings = [
     {
       id: 1,
@@ -44,7 +48,7 @@ const Featured = () => {
   ]
 
   return (
-    <div className='w-full bg-white py-16 sm:py-5'>
+    <div className='w-full bg-white py-16 sm:py-20'>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         
         {/* Header */}
@@ -57,12 +61,13 @@ const Featured = () => {
           </p>
         </div>
 
-        {/* Cards Grid */}
+        {/* Cards Grid - Always shows exactly 4 listings */}
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12'>
           {listings.map((listing) => (
-            <div 
+            <Link 
               key={listing.id}
-              className='border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer'
+              href={`/listings/${listing.id}`}
+              className='border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer block'
             >
               {/* Image */}
               <div className='relative w-full h-48 bg-gray-100'>
@@ -94,7 +99,7 @@ const Featured = () => {
                   <span>{listing.price}</span>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
