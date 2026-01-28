@@ -7,12 +7,13 @@ import Footer from "./(main)/footer/page";
 
 export default function Home() {
   return (
-    <>
-    <NavBar />
-    <HeroPage />
-    <Featured />
-    <Footer />
-    </>
+    <div className="flex flex-col min-h-screen">
+      <NavBar />
+      <main className="flex-1">
+        <HeroPage />
+        <Featured />
+      </main>
+      <Footer />
+    </div>
   );
 }
-
