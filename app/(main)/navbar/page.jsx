@@ -2,6 +2,7 @@ import { UserButton } from '@clerk/nextjs'
 import React from 'react'
 import Link from 'next/link'
 import { SignInButton, SignUpButton, SignedOut, SignedIn } from '@clerk/nextjs'
+import Image from 'next/image'
 
 const NavBar = () => {
   return (
@@ -9,9 +10,16 @@ const NavBar = () => {
       <div className='mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8'>
 
         {/* Left: Logo */}
-        <Link href="/" className='text-2xl font-bold text-gray-900 hover:text-gray-700 transition-colors'>
-          Logo
-        </Link>
+        <div className='space-y-4'>
+          <Link href='/'>
+          <Image
+            src="/logo.svg"
+            alt="Logo"
+            width={48}
+            height={48}
+          />
+          </Link>
+        </div>
 
         {/* Middle: Search+Listing*/}
         <div className='hidden md:flex items-center gap-4'>
