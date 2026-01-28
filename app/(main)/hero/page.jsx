@@ -7,7 +7,7 @@ const HeroPage = () => {
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-32'>
         <div className='text-center space-y-8'>
           <h1 className='text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900'>
-            Unity Platform for Housing
+            Unyt Platform for Housing
           </h1>
           <p className='text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto'>
             Find your perfect home with ease. Browse thousands of listings, connect with landlords and students, and discover your next place to call home.
