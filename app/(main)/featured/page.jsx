@@ -48,7 +48,7 @@ const Featured = async () => {
   ]
 
   return (
-    <div className='w-full bg-white py-16 sm:py-20'>
+    <div className='w-full bg-white py-16 sm:py-1'>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         
         {/* Header */}
@@ -104,7 +104,7 @@ const Featured = async () => {
         </div>
 
         {/* View All Button */}
-        <div className='text-center'>
+        <div className='text-center p-5'>
           <Link 
             href='/listings'
             className='inline-block px-8 py-3 border border-gray-300 text-gray-900 rounded-md font-semibold hover:bg-gray-50 transition-colors'
