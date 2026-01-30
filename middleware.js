@@ -4,20 +4,20 @@ const isPublicRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/",
-  "/api/listings",  // Allow GET requests
+  "/api/listings(.*)", // allow GET /api/listings AND /api/listings/:id
 ]);
 
 const isProtectedApiRoute = createRouteMatcher([
-  "/api/listings",  // Will protect POST/PUT/DELETE
+  "/api/listings(.*)", // protect POST/PUT/DELETE on all listings routes
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // Protect POST/PUT/DELETE on API routes
-  if (isProtectedApiRoute(req) && req.method !== 'GET') {
+  // Protect write operations on listings
+  if (isProtectedApiRoute(req) && req.method !== "GET") {
     await auth.protect();
   }
-  
-  // Protect other non-public routes
+
+  // Protect everything else that isn't public
   if (!isPublicRoute(req) && !isProtectedApiRoute(req)) {
     await auth.protect();
   }
