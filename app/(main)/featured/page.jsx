@@ -73,7 +73,7 @@ const Featured = async () => {
 
                 <div className='flex items-center gap-2 text-lg font-bold text-gray-900'>
                   <PoundSterling className='h-5 w-5'/>
-                  <span>{listing.price}/month</span>
+                  <span>£{listing.price}/month</span>
                 </div>
               </div>
               </Link>
