@@ -1,16 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@clerk/nextjs'
-import { Upload } from 'lucide-react'
+import { Upload, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Image from 'next/image'
+import Link from 'next/link'
+import { use } from 'react'
 
-const PostListing = () => {
+const EditListing = ({ params }) => {
+  const { id } = use(params)
   const router = useRouter()
   const { userId } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
   const [imagePreview, setImagePreview] = useState(null)
   
   const [formData, setFormData] = useState({
@@ -21,6 +25,48 @@ const PostListing = () => {
     price: '',
     imageUrl: '',
   })
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        const res = await fetch(`/api/listings/${id}`)
+        const data = await res.json()
+
+        if (data.success) {
+          const listing = data.data
+          
+          // Check ownership
+          if (listing.owner !== userId) {
+            toast.error('You do not have permission to edit this listing')
+            router.push(`/listings/${id}`)
+            return
+          }
+
+          setFormData({
+            title: listing.title,
+            description: listing.description,
+            location: listing.location,
+            country: listing.country,
+            price: listing.price.toString(),
+            imageUrl: listing.imageUrl,
+          })
+          setImagePreview(listing.imageUrl)
+        } else {
+          toast.error('Listing not found')
+          router.push('/listings')
+        }
+      } catch (error) {
+        console.error('Error fetching listing:', error)
+        toast.error('Failed to load listing')
+      } finally {
+        setFetching(false)
+      }
+    }
+
+    if (userId) {
+      fetchListing()
+    }
+  }, [id, userId, router])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -42,16 +88,16 @@ const PostListing = () => {
     reader.readAsDataURL(file)
 
     // Upload to Cloudinary
-    const formData = new FormData()
-    formData.append('file', file)
-    formData.append('upload_preset', 'unyt_main') 
+    const uploadData = new FormData()
+    uploadData.append('file', file)
+    uploadData.append('upload_preset', 'your_upload_preset')
     
     try {
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
           method: 'POST',
-          body: formData,
+          body: uploadData,
         }
       )
       
@@ -69,22 +115,11 @@ const PostListing = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    if (!userId) {
-      toast.error('Please sign in to post a listing')
-      return
-    }
-
-    if (!formData.imageUrl) {
-      toast.error('Please upload an image')
-      return
-    }
-
     setLoading(true)
 
     try {
-      const res = await fetch('/api/listings', {
-        method: 'POST',
+      const res = await fetch(`/api/listings/${id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -97,30 +132,48 @@ const PostListing = () => {
       const data = await res.json()
 
       if (data.success) {
-        toast.success('Listing created successfully')
-        router.push(`/listings/${data.data._id}`)
+        toast.success('Listing updated successfully')
+        router.push(`/listings/${id}`)
         router.refresh()
       } else {
-        toast.error(data.error || 'Failed to create listing')
+        toast.error(data.error || 'Failed to update listing')
       }
     } catch (error) {
-      console.error('Error creating listing:', error)
-      toast.error('Failed to create listing')
+      console.error('Error updating listing:', error)
+      toast.error('Failed to update listing')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (fetching) {
+    return (
+      <div className='w-full bg-white py-20'>
+        <div className='mx-auto max-w-3xl px-4 text-center'>
+          <p className='text-gray-600'>Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className='w-full bg-white py-12'>
       <div className='mx-auto max-w-3xl px-4 sm:px-6 lg:px-8'>
         
+        <Link 
+          href={`/listings/${id}`}
+          className='inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors'
+        >
+          <ArrowLeft className='h-5 w-5' />
+          Back to listing
+        </Link>
+
         <div className='mb-8'>
           <h1 className='text-3xl sm:text-4xl font-bold text-gray-900 mb-2'>
-            Post a Listing
+            Edit Listing
           </h1>
           <p className='text-gray-600'>
-            Share your property with potential renters
+            Update your property details
           </p>
         </div>
 
@@ -139,7 +192,6 @@ const PostListing = () => {
               onChange={handleChange}
               required
               className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900'
-              placeholder='Modern Studio Apartment'
             />
           </div>
 
@@ -156,7 +208,6 @@ const PostListing = () => {
               required
               rows={5}
               className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900'
-              placeholder='Describe your property...'
             />
           </div>
 
@@ -174,7 +225,6 @@ const PostListing = () => {
                 onChange={handleChange}
                 required
                 className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900'
-                placeholder='Downtown'
               />
             </div>
 
@@ -190,7 +240,6 @@ const PostListing = () => {
                 onChange={handleChange}
                 required
                 className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900'
-                placeholder='United Kingdom'
               />
             </div>
           </div>
@@ -209,7 +258,6 @@ const PostListing = () => {
               required
               min='0'
               className='w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900'
-              placeholder='£1200'
             />
           </div>
 
@@ -220,7 +268,7 @@ const PostListing = () => {
             </label>
             
             <div className='border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors'>
-              {imagePreview ? (
+              {imagePreview && (
                 <div className='space-y-4'>
                   <div className='relative w-full h-64'>
                     <Image
@@ -240,18 +288,6 @@ const PostListing = () => {
                     />
                   </label>
                 </div>
-              ) : (
-                <label className='cursor-pointer block'>
-                  <Upload className='mx-auto h-12 w-12 text-gray-400 mb-2' />
-                  <span className='text-gray-600'>Click to upload an image</span>
-                  <input
-                    type='file'
-                    accept='image/*'
-                    onChange={handleImageUpload}
-                    className='hidden'
-                    required
-                  />
-                </label>
               )}
             </div>
           </div>
@@ -262,7 +298,7 @@ const PostListing = () => {
             disabled={loading}
             className='w-full px-6 py-3 bg-gray-900 text-white rounded-md font-semibold hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            {loading ? 'Creating...' : 'Create Listing'}
+            {loading ? 'Updating...' : 'Update Listing'}
           </button>
         </form>
       </div>
@@ -270,4 +306,4 @@ const PostListing = () => {
   )
 }
 
-export default PostListing
+export default EditListing

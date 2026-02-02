@@ -37,7 +37,7 @@ const DeleteButton = ({listingId}) => {
   return (
     <button 
     onClick={handleDelete}
-    className='px-6 py-2 border border-red-600 rounded-md font-semibold hover:bg-red-50 transition-colors flex items-center gap-2'
+    className='px-6 py-2 border border-gray-400 bg-red-600 rounded-md font-semibold hover:bg-red-400 transition-colors flex items-center gap-2'
     >
       <Trash2  className='h-4 w-4'/>
     </button>

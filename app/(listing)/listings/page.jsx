@@ -10,7 +10,7 @@ const ListingsPage = async() => {
   let listings = [];
 
   try {
-    const res = await fetch('http://localhost:3000/api/listings',{
+    const res = await fetch(`http://localhost:3000/api/listings/`, {
       cache: 'no-store'
     });
     const data = await res.json();
