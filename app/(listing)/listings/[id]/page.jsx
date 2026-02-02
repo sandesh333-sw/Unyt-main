@@ -93,14 +93,16 @@ const ViewListingPage = async({params}) => {
 
             {/* Owner Actions */}
             {isOwner && (
-              <div className='pt-6 border-t border-gray-200 flex gap-4'>
+              <div className='pt-6 border-t border-gray-200 flex gap-4 p-4'>
                 <Link
                 href={`/listings/${listing._id}/edit`}
                 className='px-6 py-2 bg-gray-900 text-white rounded-md font-semibold hover:bg-gray-800 transition-colors'
                 >
                   Edit Listing
                 </Link>
-                <DeleteButton listingId={listing._id}/>
+                <DeleteButton
+                listingId={listing._id}
+                />
               </div>
             )}
           </div>

@@ -60,7 +60,7 @@ export async function POST(request){
             price,
             imageUrl,
             imagePublicId,
-            owner: 123,
+            owner: userId,
         });
 
         return NextResponse.json(
