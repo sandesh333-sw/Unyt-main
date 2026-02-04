@@ -32,6 +32,17 @@ const listingSchema = new mongoose.Schema({
         type: String, //Clerk UserId
         required: true,
     },
+    geometry: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            default: 'Point'
+        },
+        coordinates: {
+            type: [Number], // [Longitude, latitude]
+            default: [0,0]
+        }
+    },
     reviews: [
         {
             type: mongoose.Schema.Types.ObjectId,
