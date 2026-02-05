@@ -2,13 +2,30 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import connectDB from "@/app/lib/mongodb";
 import Listing from "@/app/models/Listing";
+import { geocodeLocation } from "@/app/lib/geocoding";
 
-// GET -  All listings 
+// GET -  All listings with optional search
 export async function GET(request){
     try {
         await connectDB();
 
-        const listings = await Listing.find({}).sort({createdAt: -1});
+        const { searchParams } = new URL(request.url);
+        const search = searchParams.get('search');
+
+        let query = {};
+
+        if (search){
+            query = {
+                $or: [
+                    { title: { $regex: search, $options: 'i'}},
+                    { description: {$regex: search, $options: 'i'}},
+                    { location: { $regex: search, $options: 'i'}},
+                    { country: { $regex: search, $options: 'i'}},
+                ]
+            };
+        }
+
+        const listings = await Listing.find(query).sort({createdAt: -1});
 
         return NextResponse.json({
             success: true,
