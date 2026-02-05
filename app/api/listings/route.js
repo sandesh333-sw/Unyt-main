@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import connectDB from "@/app/lib/mongodb";
 import Listing from "@/app/models/Listing";
 
-// GET -  All listings
+// GET -  All listings 
 export async function GET(request){
     try {
         await connectDB();
