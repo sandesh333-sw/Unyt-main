@@ -3,14 +3,20 @@ import { MapPin, PoundSterling } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
+const ListingsPage = async({ searchParams }) => {
 
-
-const ListingsPage = async() => {
+  const params = await searchParams
+  const search = params?.search || ''
 
   let listings = [];
 
   try {
-    const res = await fetch(`http://localhost:3000/api/listings/`, {
+
+    const url = search
+      ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/listings?search=${encodeURIComponent(search)}`
+      : `${process.env.NEXT_PUBLIC_BASE_URL}/api/listings`
+
+    const res = await fetch(url, {
       cache: 'no-store'
     });
     const data = await res.json();
