@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { auth } from '@clerk/nextjs/server';
 import connectDB from "@/app/lib/mongodb";
 import Listing from "@/app/models/Listing";
+import { geocodeLocation } from "@/app/lib/geocoding";
 
-// GET: get single listing
+// GET: Get single listing
 export async function GET(request, { params }) {
   try {
     await connectDB();
@@ -32,7 +33,7 @@ export async function GET(request, { params }) {
   }
 }
 
-// PUT: update listing
+// PUT: Update listing
 export async function PUT(request, { params }){
   try {
     const { userId } = await auth();
@@ -46,7 +47,7 @@ export async function PUT(request, { params }){
 
     await connectDB();
 
-    const id = await params;
+    const { id } = await params;
     const listing = await Listing.findById(id);
 
     if (!listing){
@@ -67,7 +68,13 @@ export async function PUT(request, { params }){
     const body = await request.json();
     const { title, description, location, country, price, imageUrl, imagePublicId } = body;
 
-    const updatedListing = Listing.findByIdAndUpdate(
+    // Geocode location if it changed
+    let geometry = listing.geometry;
+    if (location !== listing.location){
+      geometry = await geocodeLocation(location);
+    }
+
+    const updatedListing = await Listing.findByIdAndUpdate(
       id,
       {
         title,
@@ -77,6 +84,7 @@ export async function PUT(request, { params }){
         price,
         imageUrl,
         imagePublicId,
+        geometry,
       },
       { new: true, runValidators: true}
     );
@@ -111,11 +119,11 @@ export async function DELETE(request, { params }){
     await connectDB();
 
     const { id } = await params;
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id);;
 
     if (!listing){
       return NextResponse.json(
-        { success: true, error: 'Listing not found'},
+        { success: false, error: 'Listing not found'},
         { status: 404 }
       );
     }
