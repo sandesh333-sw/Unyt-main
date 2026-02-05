@@ -119,11 +119,11 @@ export async function DELETE(request, { params }){
     await connectDB();
 
     const { id } = await params;
-    const listing = await Listing.findById(id);
+    const listing = await Listing.findById(id);;
 
     if (!listing){
       return NextResponse.json(
-        { success: true, error: 'Listing not found'},
+        { success: false, error: 'Listing not found'},
         { status: 404 }
       );
     }

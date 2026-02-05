@@ -1,10 +1,26 @@
+'use client'
+
 import { UserButton } from '@clerk/nextjs'
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { SignInButton, SignUpButton, SignedOut, SignedIn } from '@clerk/nextjs'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 const NavBar = () => {
+
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()){
+      router.push(`/listings?search=${encodeURIComponent(searchQuery.trim())}`)
+    } else {
+      router.push('/listings')
+    }
+  }
+
   return (
     <nav className='w-full border-b bg-white shadow-sm'>
       <div className='mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8'>
@@ -23,16 +39,18 @@ const NavBar = () => {
 
         {/* Middle: Search+Listing*/}
         <div className='hidden md:flex items-center gap-4'>
-          <div className='flex items-center rounded-lg border border-gray-300 bg-gray-50 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all'>
+          <form onSubmit={handleSearch} className='flex items-center rounded-lg border border-gray-300 bg-gray-50 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all'>
             <input
               type='text'
               placeholder='Search...'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className='bg-transparent px-4 py-2 text-sm outline-none w-64'
             />
-            <button className="bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
+            <button type='submit'className="bg-gray-900 px-5 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors">
               Search
             </button>
-          </div>
+          </form>
 
           <Link
             href='/listings'
