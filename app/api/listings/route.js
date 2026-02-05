@@ -69,6 +69,9 @@ export async function POST(request){
             );
         }
 
+        // Geocode the location
+        const geometry = await geocodeLocation(location);
+
         const newListing = await Listing.create({
             title,
             description,
@@ -78,6 +81,7 @@ export async function POST(request){
             imageUrl,
             imagePublicId,
             owner: userId,
+            geometry,
         });
 
         return NextResponse.json(
