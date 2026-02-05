@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { MapPin, PoundSterling, ArrowLeft } from 'lucide-react'
 import { auth } from '@clerk/nextjs/server'
 import DeleteButton from './DeleteButton'
+import MapView from './MapView'
 
 const ViewListingPage = async({params}) => {
   const { id } = await params;
@@ -13,7 +14,7 @@ const ViewListingPage = async({params}) => {
   let isOwner = false;
   
   try {
-    const res = await fetch(`http://localhost:3000/api/listings/${id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/listings/${id}`, {
       cache: 'no-store'
     });
 
@@ -89,6 +90,23 @@ const ViewListingPage = async({params}) => {
             <div className='mb-3 p-5'>
               <h2 className='text-xl font-semibold text-gray-900 mb-3'>Description</h2>
               <p className='text-gray-600'>{listing.description}</p>
+            </div>
+
+            {/* Map */}
+            <div className='p-3'>
+              <h2 className='text-xl font-semibold text-gray-900 mb-3 px-5'>Location</h2>
+              {listing.geometry && listing.geometry.coordinates &&
+                listing.geometry.coordinates[0] !== 0 &&
+                listing.geometry.coordinates[1] !== 0 ? (
+                  <MapView 
+                    coordinates={listing.geometry.coordinates}
+                    location={listing.location}
+                  />
+                ) :(
+                <div className='w-full h-96 rounded-lg border border-gray-200 bg-gray-50 flex items-center justify-center'>
+                  <p className='text-gray-500'>Location data not available</p>
+                </div>
+              )}
             </div>
 
             {/* Owner Actions */}
