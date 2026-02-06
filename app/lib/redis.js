@@ -73,3 +73,5 @@ export const cache = {
         }
     },
 };
+
+export default redis;
