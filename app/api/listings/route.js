@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import connectDB from "@/app/lib/mongodb";
 import Listing from "@/app/models/Listing";
 import { geocodeLocation } from "@/app/lib/geocoding";
+import { cache } from "@/app/lib/redis";
 
 // GET -  All listings with optional search
 export async function GET(request){
@@ -11,6 +12,24 @@ export async function GET(request){
 
         const { searchParams } = new URL(request.url);
         const search = searchParams.get('search');
+
+        // Create cache key
+        const cacheKey = search ? `listings:search:${search}`: 'listings:all';
+
+        // Try to get from cache first
+        const cachedData = await cache.get(cacheKey);
+
+        if (cachedData){
+            console.log('Cache HIT:', cacheKey);
+
+            return NextResponse.json({
+                success: true,
+                data: cachedData,
+                cached: true
+            }, {status: 200});
+        }
+
+        console.log('Cache Miss', cacheKey);
 
         let query = {};
 
@@ -27,9 +46,13 @@ export async function GET(request){
 
         const listings = await Listing.find(query).sort({createdAt: -1});
 
+        // Cache the results for 5 minutes (300 seconds)
+        await cache.set(cacheKey, listings, 300);
+
         return NextResponse.json({
             success: true,
-            data: listings
+            data: listings,
+            cached: false
         }, { status: 200});
     } catch (error) {
         console.error('Error fetching listings: ', error);
