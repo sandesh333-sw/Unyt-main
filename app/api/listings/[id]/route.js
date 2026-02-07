@@ -109,6 +109,9 @@ export async function PUT(request, { params }){
       { new: true, runValidators: true}
     );
 
+    await cache.del(`listings:${id}`);
+    await cache.delPattern('listings:*');
+
     return NextResponse.json(
       { success: true, data: updatedListing },
       { status: 200}
