@@ -107,6 +107,9 @@ export async function POST(request){
             geometry,
         });
 
+        // Invalidate all listings cache
+        await cache.delPattern('listings:*');
+
         return NextResponse.json(
             { success: true, data: newListing},
             { status: 201 }
