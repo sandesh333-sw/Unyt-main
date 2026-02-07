@@ -3,13 +3,30 @@ import { auth } from '@clerk/nextjs/server';
 import connectDB from "@/app/lib/mongodb";
 import Listing from "@/app/models/Listing";
 import { geocodeLocation } from "@/app/lib/geocoding";
+import { cache } from "@/app/lib/redis";
 
-// GET: Get single listing
+
+// GET: Get single listing with caching
 export async function GET(request, { params }) {
   try {
     await connectDB();
 
     const { id } = await params; 
+    const cacheKey = `listing:${id}`;
+
+    // Try cache first
+    const cachedListing = await cache.get(cacheKey);
+
+    if (cachedListing){
+      console.log('Cache HIT:', cacheKey);
+      return NextResponse.json({
+        success: true,
+        data: cachedListing,
+        cached: true
+      }, { status: 200 });
+    }
+
+    console.log('Cache MISS:', cacheKey);
 
     const listing = await Listing.findById(id);
 
@@ -20,8 +37,11 @@ export async function GET(request, { params }) {
       );
     }
 
+    // Cache for 10 minutes (600 seconds)
+    await cache.set(cacheKey, listing, 600);
+
     return NextResponse.json(
-      { success: true, data: listing },
+      { success: true, data: listing , cached: false},
       { status: 200 }
     );
   } catch (error) {
@@ -89,6 +109,9 @@ export async function PUT(request, { params }){
       { new: true, runValidators: true}
     );
 
+    await cache.del(`listings:${id}`);
+    await cache.delPattern('listings:*');
+
     return NextResponse.json(
       { success: true, data: updatedListing },
       { status: 200}
@@ -137,6 +160,10 @@ export async function DELETE(request, { params }){
     }
 
     await Listing.findByIdAndDelete(id);
+
+    // Invalidate cache
+    await cache.del(`lisings:${id}`);
+    await cache.delPattern('listings:*');
 
     return NextResponse.json(
       { success: true, message: 'Listing deleted successfully'},
