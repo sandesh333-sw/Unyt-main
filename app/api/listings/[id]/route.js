@@ -161,6 +161,10 @@ export async function DELETE(request, { params }){
 
     await Listing.findByIdAndDelete(id);
 
+    // Invalidate cache
+    await cache.del(`lisings:${id}`);
+    await cache.delPattern('listings:*');
+
     return NextResponse.json(
       { success: true, message: 'Listing deleted successfully'},
       { status: 200}
